@@ -75,16 +75,16 @@ input:hover,input:focus{border-color:var(--bord-hi)}
     <label>Mode de déplacement</label>
     <div class="sw">
       <select id="sel-mode" onchange="onModeChange()">
-        <option value="corbeau">🐦‍⬛ Corbeau — 18/j</option>
-        <option value="emissaire">🏃 Émissaire — 0.7/j</option>
-        <option value="pied">🚶 À pied — 0.5/j</option>
-        <option value="cheval" selected>🐴 À cheval — 1/j</option>
-        <option value="convoi">🛒 Convoi — 0.7/j</option>
+        <option value="corbeau">🐦‍⬛ Corbeau </option>
+        <option value="emissaire">🏃 Émissaire </option>
+        <option value="pied">🚶 À pied </option>
+        <option value="cheval" selected>🐴 À cheval </option>
+        <option value="convoi">🛒 Convoi </option>
         <option value="armee">⚔️ Armée</option>
-        <option value="dragon">🐉 Dragon — 5/j</option>
-        <option value="snekkar">⛵ Snekkar — 2/j</option>
-        <option value="galere">🚢 Galère — 1.5/j</option>
-        <option value="peche">🎣 Navire pêche — 1.5/j</option>
+        <option value="dragon">🐉 Dragon </option>
+        <option value="snekkar">⛵ Snekkar </option>
+        <option value="galere">🚢 Galère </option>
+        <option value="peche">🎣 Navire pêche </option>
       </select>
     </div>
   </div>
@@ -134,7 +134,7 @@ const HEX_W=Math.sqrt(3)*HEX_R,HEX_H=2*HEX_R;
 const MODES={
   corbeau:  {label:"Corbeau",    speed:18, emoji:"🐦‍⬛"},
   emissaire:{label:"Émissaire",  speed:1.5, emoji:"🏃"},
-  pied:   {label:"À pied",         speed:0.5, emoji:"🚶"},
+  pied:   {label:"À pied",         speed:0.3, emoji:"🚶"},
   cheval: {label:"À cheval",        speed:1,   emoji:"🐴"},
   convoi: {label:"Convoi",          speed:0.7, emoji:"🛒"},
   armee:  {label:"Armée",           speed:-1,  emoji:"⚔️"},
