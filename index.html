@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Westeros — Voyage</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚔️</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cinzel+Decorative:wght@700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gold:#d4a843;--gold-br:#f0c862;--gold-dim:#9a7420;
+  --parch:#c9a96e;--parch-dk:#7a5c28;
+  --ink:#120b00;--bg:#060401;--panel:rgba(6,4,1,0.98);--bord:rgba(212,168,67,0.22);
+  --bord-hi:rgba(212,168,67,0.55);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--parch);font-family:'Crimson Text',serif}
+body{display:flex;flex-direction:column}
+#hdr{
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:8px 18px;
+  background:linear-gradient(180deg,rgba(20,12,2,0.99) 0%,rgba(6,4,1,0.98) 100%);
+  border-bottom:1px solid var(--bord);
+  flex-shrink:0;min-height:54px;z-index:10;
+  box-shadow:0 2px 20px rgba(0,0,0,0.6);
+}
+#hdr h1{font-family:'Cinzel Decorative',serif;font-size:13px;color:var(--gold);letter-spacing:4px;white-space:nowrap;text-shadow:0 0 20px rgba(212,168,67,0.3)}
+.vsep{width:1px;height:28px;background:var(--bord);flex-shrink:0}
+.fld{display:flex;flex-direction:column;gap:2px}
+.fld label{font-family:'Cinzel',serif;font-size:7.5px;letter-spacing:2.5px;color:var(--parch-dk);text-transform:uppercase}
+.sw{position:relative;display:inline-block}
+.sw::after{content:'▾';position:absolute;right:7px;top:50%;transform:translateY(-50%);color:var(--gold-dim);pointer-events:none;font-size:10px}
+select{background:rgba(0,0,0,0.55);border:1px solid var(--bord);color:var(--parch);font-family:'Crimson Text',serif;font-size:12.5px;padding:5px 24px 5px 9px;outline:none;border-radius:3px;appearance:none;cursor:pointer;transition:border-color .15s}
+select:hover,select:focus{border-color:var(--bord-hi)}
+select option{background:#130a00}
+input[type=number]{background:rgba(0,0,0,0.55);border:1px solid var(--bord);color:var(--parch);font-family:'Crimson Text',serif;font-size:12.5px;padding:5px 9px;outline:none;border-radius:3px;transition:border-color .15s}
+input:hover,input:focus{border-color:var(--bord-hi)}
+#army-fld{display:none}
+#army-fld.v{display:flex}
+.btn{padding:5px 12px;border:1px solid var(--bord);background:transparent;color:var(--parch-dk);font-family:'Cinzel',serif;font-size:8.5px;letter-spacing:.8px;cursor:pointer;transition:all .15s;border-radius:3px;white-space:nowrap}
+.btn:hover{border-color:var(--bord-hi);color:var(--parch)}
+#result{display:flex;align-items:center;gap:14px;background:rgba(212,168,67,0.05);border:1px solid var(--bord);border-left:2px solid var(--gold-dim);padding:5px 16px;border-radius:3px;margin-left:auto}
+#result.h{display:none}
+.r-block{display:flex;flex-direction:column;align-items:center}
+.r-val{font-family:'Cinzel',serif;color:var(--gold-br);line-height:1}
+.r-val.big{font-size:26px}
+.r-val.med{font-size:18px;color:var(--gold)}
+.r-lbl{font-size:7.5px;color:var(--parch-dk);letter-spacing:1.5px;font-family:'Cinzel',serif;text-transform:uppercase;margin-top:2px}
+.r-sep{width:1px;height:32px;background:var(--bord)}
+#r-info{font-size:10px;color:var(--parch-dk);line-height:1.7;max-width:180px}
+#cp-bar{padding:4px 18px;background:rgba(10,6,1,0.9);border-bottom:1px solid var(--bord);flex-shrink:0;display:flex;align-items:center;gap:5px;overflow-x:auto;min-height:30px;font-family:'Cinzel',serif;font-size:9px}
+#cp-bar::-webkit-scrollbar{height:3px}
+#cp-bar::-webkit-scrollbar-thumb{background:rgba(122,92,40,0.5);border-radius:2px}
+.cp-tag{display:flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;white-space:nowrap;font-size:9px;border:1px solid rgba(212,168,67,0.15);background:rgba(212,168,67,0.04)}
+.cp-tag .n{width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7.5px;font-weight:700;flex-shrink:0}
+.cp-arr{color:rgba(122,92,40,0.6);font-size:8px;flex-shrink:0}
+#map-area{flex:1;overflow:hidden;position:relative;background:#030201;cursor:crosshair}
+#map-canvas{position:absolute;top:0;left:0;transform-origin:0 0}
+#tip{position:fixed;background:rgba(3,2,0,0.97);border:1px solid var(--bord);border-left:2px solid var(--gold-dim);color:var(--parch);font-family:'Cinzel',serif;font-size:9.5px;padding:4px 11px;pointer-events:none;z-index:200;display:none;border-radius:3px;letter-spacing:.5px}
+#toast{position:fixed;bottom:16px;right:16px;background:rgba(3,2,0,0.98);border:1px solid var(--bord-hi);color:var(--parch);padding:7px 16px;font-size:11px;font-family:'Cinzel',serif;letter-spacing:.5px;z-index:500;transform:translateY(55px);opacity:0;transition:all .22s;pointer-events:none;border-radius:3px}
+#toast.s{transform:translateY(0);opacity:1}
+#loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#030201;z-index:50;gap:16px}
+#loading h2{font-family:'Cinzel Decorative',serif;font-size:20px;color:var(--gold);letter-spacing:5px;text-shadow:0 0 30px rgba(212,168,67,0.4)}
+#loading p{font-size:11px;color:var(--parch-dk);font-style:italic;letter-spacing:2px}
+.spinner{width:36px;height:36px;border:1.5px solid var(--bord);border-top-color:var(--gold);border-radius:50%;animation:spin .9s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<div id="hdr">
+  <h1>⚔ WESTEROS</h1>
+  <div class="vsep"></div>
+  <div class="fld">
+    <label>Mode de déplacement</label>
+    <div class="sw">
+      <select id="sel-mode" onchange="onModeChange()">
+        <option value="pied">🚶 À pied — 0.5/j</option>
+        <option value="cheval" selected>🐴 À cheval — 1/j</option>
+        <option value="convoi">🛒 Convoi — 0.7/j</option>
+        <option value="armee">⚔️ Armée</option>
+        <option value="dragon">🐉 Dragon — 5/j</option>
+        <option value="snekkar">⛵ Snekkar — 2/j</option>
+        <option value="galere">🚢 Galère — 1.5/j</option>
+        <option value="peche">🎣 Navire pêche — 1.5/j</option>
+      </select>
+    </div>
+  </div>
+  <div class="fld" id="army-fld">
+    <label>Effectif</label>
+    <input type="number" id="inp-army" value="10000" min="1" step="1000" style="width:100px" oninput="calculate()">
+  </div>
+  <div class="vsep"></div>
+  <button class="btn" onclick="clearAll()">✕ Réinitialiser</button>
+  <div id="result" class="h">
+    <div class="r-block">
+      <div class="r-val big" id="r-days">—</div>
+      <div class="r-lbl">jours</div>
+    </div>
+    <div class="r-sep"></div>
+    <div class="r-block">
+      <div class="r-val med" id="r-hours">—</div>
+      <div class="r-lbl">heures restantes</div>
+    </div>
+    <div class="r-sep"></div>
+    <div id="r-info"></div>
+  </div>
+</div>
+
+<div id="cp-bar">
+  <span style="color:var(--parch-dk);font-size:9px;letter-spacing:1.2px">
+    Clic gauche : ajouter un point &nbsp;·&nbsp; Clic droit : supprimer le dernier
+  </span>
+</div>
+
+<div id="map-area">
+  <div id="loading">
+    <div class="spinner"></div>
+    <h2>WESTEROS</h2>
+    <p>Chargement de la carte…</p>
+  </div>
+  <canvas id="map-canvas"></canvas>
+</div>
+
+<div id="tip"></div>
+<div id="toast"></div>
+
+<script>
+const MAP_W=2000,MAP_H=1303,HEX_R=22;
+const HEX_W=Math.sqrt(3)*HEX_R,HEX_H=2*HEX_R;
+
+const MODES={
+  pied:   {label:"À pied",         speed:0.5, emoji:"🚶"},
+  cheval: {label:"À cheval",        speed:1,   emoji:"🐴"},
+  convoi: {label:"Convoi",          speed:0.7, emoji:"🛒"},
+  armee:  {label:"Armée",           speed:-1,  emoji:"⚔️"},
+  dragon: {label:"Dragon",          speed:5,   emoji:"🐉"},
+  snekkar:{label:"Snekkar",         speed:2,   emoji:"⛵"},
+  galere: {label:"Galère",          speed:1.5, emoji:"🚢"},
+  peche:  {label:"Navire de pêche", speed:1.5, emoji:"🎣"},
+};
+
+const CP_COLORS=['#50dc50','#f0c862','#60aaff','#ff8c60','#cc77ff','#ff6090','#50e8d0','#ffcc30'];
+const cpColor=i=>CP_COLORS[i%CP_COLORS.length];
+
+const V={scale:1,ox:0,oy:0,minScale:.25,maxScale:7};
+const S={checkpoints:[],hover:null,mode:'cheval'};
+
+const hexCenter=(c,r)=>({x:c*HEX_W+(r%2===1?HEX_W/2:0)+HEX_W/2,y:r*HEX_H*.75+HEX_H/2});
+
+function pxToHex(px,py){
+  const rA=Math.round((py-HEX_H/2)/(HEX_H*.75));
+  let best=null,bd=HEX_R*HEX_R*1.8;
+  for(let dr=-1;dr<=1;dr++){
+    const ro=rA+dr;if(ro<0)continue;
+    const xo=ro%2===1?HEX_W/2:0,cA=Math.round((px-xo-HEX_W/2)/HEX_W);
+    for(let dc=-1;dc<=1;dc++){
+      const co=cA+dc;if(co<0)continue;
+      const c=hexCenter(co,ro),d=(px-c.x)**2+(py-c.y)**2;
+      if(d<bd){bd=d;best=[co,ro];}
+    }
+  }
+  return best;
+}
+function hexDist(c1,r1,c2,r2){
+  const cube=(c,r)=>{const x=c-((r-(r&1))>>1);return{x,y:-x-r,z:r};};
+  const a=cube(c1,r1),b=cube(c2,r2);
+  return Math.max(Math.abs(a.x-b.x),Math.abs(a.y-b.y),Math.abs(a.z-b.z));
+}
+function hexLerp(c1,r1,c2,r2,t){
+  const cube=(c,r)=>{const x=c-(r-(r&1))/2;return{x,y:-x-r,z:r};};
+  const a=cube(c1,r1),b=cube(c2,r2);
+  const ix=a.x+(b.x-a.x)*t,iy=a.y+(b.y-a.y)*t,iz=a.z+(b.z-a.z)*t;
+  let rx=Math.round(ix),ry=Math.round(iy),rz=Math.round(iz);
+  const dx=Math.abs(rx-ix),dy=Math.abs(ry-iy),dz=Math.abs(rz-iz);
+  if(dx>dy&&dx>dz)rx=-ry-rz;else if(dy>dz)ry=-rx-rz;else rz=-rx-ry;
+  return[rx+((rz-(rz&1))>>1),rz];
+}
+function hexLine(c1,r1,c2,r2){
+  const n=hexDist(c1,r1,c2,r2);if(n===0)return[[c1,r1]];
+  return Array.from({length:n+1},(_,i)=>hexLerp(c1,r1,c2,r2,i/n));
+}
+
+const area=document.getElementById('map-area');
+const cv=document.getElementById('map-canvas');
+const ctx=cv.getContext('2d');
+cv.width=MAP_W;cv.height=MAP_H;
+
+const mapImg=new Image();
+mapImg.onload=()=>{document.getElementById('loading').style.display='none';fitMap();render();};
+mapImg.src='map.webp';
+
+function fitMap(){
+  const aw=area.clientWidth,ah=area.clientHeight;
+  const s=Math.min(aw/MAP_W,ah/MAP_H,1);
+  V.scale=s;V.ox=(aw-MAP_W*s)/2;V.oy=(ah-MAP_H*s)/2;applyT();
+}
+function applyT(){cv.style.transform=`translate(${V.ox}px,${V.oy}px) scale(${V.scale})`;}
+
+function render(){
+  ctx.clearRect(0,0,MAP_W,MAP_H);
+  ctx.drawImage(mapImg,0,0,MAP_W,MAP_H);
+  const cols=Math.ceil(MAP_W/HEX_W)+2,rows=Math.ceil(MAP_H/(HEX_H*.75))+2;
+  ctx.strokeStyle='rgba(212,168,67,0.16)';ctx.lineWidth=.5;
+  for(let ro=0;ro<rows;ro++)for(let co=0;co<cols;co++){hexPath(co,ro);ctx.stroke();}
+  const cps=S.checkpoints;
+  for(let i=0;i<cps.length-1;i++){
+    const{col:c1,row:r1}=cps[i],{col:c2,row:r2}=cps[i+1];
+    const pts=hexLine(c1,r1,c2,r2);
+    pts.forEach(([c,r],j)=>{if(j>0&&j<pts.length-1)fillH(c,r,'rgba(240,192,64,0.11)');});
+    const{x:x1,y:y1}=hexCenter(c1,r1),{x:x2,y:y2}=hexCenter(c2,r2);
+    const g=ctx.createLinearGradient(x1,y1,x2,y2);
+    g.addColorStop(0,cpColor(i)+'cc');g.addColorStop(1,cpColor(i+1)+'cc');
+    ctx.beginPath();ctx.setLineDash([8,5]);
+    ctx.strokeStyle=g;ctx.lineWidth=2.2;ctx.lineJoin='round';ctx.lineCap='round';
+    pts.forEach(([c,r],j)=>{const{x,y}=hexCenter(c,r);j===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+    ctx.stroke();ctx.setLineDash([]);
+    if(pts.length>2){
+      const mid=pts[Math.floor(pts.length/2)];
+      const{x:mx,y:my}=hexCenter(mid[0],mid[1]);
+      const dist=hexDist(c1,r1,c2,r2);
+      ctx.font='bold 9px Cinzel,serif';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillStyle='rgba(4,2,0,0.75)';ctx.fillText(dist,mx+1,my-11+1);
+      ctx.fillStyle='rgba(240,192,64,0.9)';ctx.fillText(dist,mx,my-11);
+    }
+  }
+  cps.forEach((cp,i)=>{
+    const{x,y}=hexCenter(cp.col,cp.row);
+    const col=cpColor(i);
+    ctx.beginPath();ctx.arc(x,y,11,0,Math.PI*2);
+    ctx.strokeStyle=col+'33';ctx.lineWidth=1;ctx.stroke();
+    ctx.beginPath();ctx.arc(x,y,7,0,Math.PI*2);
+    const rg=ctx.createRadialGradient(x-2,y-2,0,x,y,7);
+    rg.addColorStop(0,col+'ff');rg.addColorStop(1,col+'99');
+    ctx.fillStyle=rg;ctx.fill();
+    ctx.strokeStyle='rgba(4,2,0,0.9)';ctx.lineWidth=1.5;ctx.stroke();
+    ctx.font='bold 8px Cinzel,serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillStyle='#080300';ctx.fillText(i+1,x,y);
+  });
+  if(S.hover){
+    fillH(S.hover[0],S.hover[1],'rgba(255,255,255,0.05)');
+    strokeH(S.hover[0],S.hover[1],'rgba(212,168,67,0.28)',1);
+  }
+}
+
+function hexPath(c,r){
+  const{x,y}=hexCenter(c,r);ctx.beginPath();
+  for(let i=0;i<6;i++){
+    const a=Math.PI/180*(60*i-30);
+    i===0?ctx.moveTo(x+HEX_R*Math.cos(a),y+HEX_R*Math.sin(a)):ctx.lineTo(x+HEX_R*Math.cos(a),y+HEX_R*Math.sin(a));
+  }
+  ctx.closePath();
+}
+function fillH(c,r,col){hexPath(c,r);ctx.fillStyle=col;ctx.fill();}
+function strokeH(c,r,col,lw){hexPath(c,r);ctx.strokeStyle=col;ctx.lineWidth=lw;ctx.stroke();}
+function screenToMap(sx,sy){return[(sx-V.ox)/V.scale,(sy-V.oy)/V.scale];}
+
+area.addEventListener('wheel',e=>{
+  e.preventDefault();
+  const f=e.deltaY<0?1.12:1/1.12;
+  const rect=area.getBoundingClientRect();
+  const mx=e.clientX-rect.left,my=e.clientY-rect.top;
+  const ns=Math.max(V.minScale,Math.min(V.maxScale,V.scale*f));
+  V.ox=mx-(mx-V.ox)*(ns/V.scale);V.oy=my-(my-V.oy)*(ns/V.scale);V.scale=ns;
+  applyT();
+},{passive:false});
+
+let panning=false,panStart={x:0,y:0},panOrig={x:0,y:0};
+area.addEventListener('mousedown',e=>{
+  if(e.button===1){e.preventDefault();panning=true;panStart={x:e.clientX,y:e.clientY};panOrig={x:V.ox,y:V.oy};area.style.cursor='grabbing';}
+});
+document.addEventListener('mousemove',e=>{
+  if(panning){V.ox=panOrig.x+(e.clientX-panStart.x);V.oy=panOrig.y+(e.clientY-panStart.y);applyT();}
+});
+document.addEventListener('mouseup',e=>{if(e.button===1&&panning){panning=false;area.style.cursor='crosshair';}});
+
+area.addEventListener('mousemove',e=>{
+  if(panning)return;
+  const rect=area.getBoundingClientRect();
+  const[mx,my]=screenToMap(e.clientX-rect.left,e.clientY-rect.top);
+  const h=pxToHex(mx,my);
+  const tip=document.getElementById('tip');
+  if(h){S.hover=h;tip.textContent=`${h[0]}, ${h[1]}`;tip.style.display='block';tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY-10)+'px';}
+  else{S.hover=null;tip.style.display='none';}
+  render();
+});
+area.addEventListener('mouseleave',()=>{S.hover=null;document.getElementById('tip').style.display='none';render();});
+
+area.addEventListener('click',e=>{
+  if(e.button!==0)return;
+  const rect=area.getBoundingClientRect();
+  const[mx,my]=screenToMap(e.clientX-rect.left,e.clientY-rect.top);
+  const h=pxToHex(mx,my);if(!h)return;
+  S.checkpoints.push({col:h[0],row:h[1]});
+  updateCpBar();calculate();render();
+  toast(`⬡ Point ${S.checkpoints.length} — [${h[0]}, ${h[1]}]`);
+});
+
+area.addEventListener('contextmenu',e=>{
+  e.preventDefault();
+  if(S.checkpoints.length===0)return;
+  const r=S.checkpoints.pop();
+  updateCpBar();calculate();render();
+  toast(`↩ [${r.col}, ${r.row}] retiré`);
+});
+
+function updateCpBar(){
+  const bar=document.getElementById('cp-bar');
+  bar.innerHTML='';
+  const cps=S.checkpoints;
+  if(cps.length===0){
+    bar.innerHTML='<span style="color:var(--parch-dk);font-size:9px;letter-spacing:1.2px">Clic gauche : ajouter un point &nbsp;·&nbsp; Clic droit : supprimer le dernier</span>';
+    return;
+  }
+  cps.forEach((cp,i)=>{
+    const tag=document.createElement('div');tag.className='cp-tag';
+    tag.innerHTML=`<span class="n" style="background:${cpColor(i)};color:#080300">${i+1}</span><span style="color:var(--parch-dk)">[${cp.col}, ${cp.row}]</span>`;
+    bar.appendChild(tag);
+    if(i<cps.length-1){
+      const a=document.createElement('span');a.className='cp-arr';
+      const d=hexDist(cps[i].col,cps[i].row,cps[i+1].col,cps[i+1].row);
+      a.textContent=`—${d}→`;bar.appendChild(a);
+    }
+  });
+}
+
+function armySpd(n){return n>=60000?0.3:n>=30000?0.5:0.7;}
+
+function calculate(){
+  const cps=S.checkpoints;
+  if(cps.length<2){document.getElementById('result').className='h';return;}
+  let totalCases=0;
+  for(let i=0;i<cps.length-1;i++)totalCases+=hexDist(cps[i].col,cps[i].row,cps[i+1].col,cps[i+1].row);
+  const spd=S.mode==='armee'?armySpd(parseInt(document.getElementById('inp-army').value)||10000):MODES[S.mode].speed;
+  const totalHours=totalCases/spd*24;
+  const days=Math.floor(totalHours/24);
+  const hours=Math.round(totalHours%24);
+  document.getElementById('r-days').textContent=days;
+  document.getElementById('r-hours').textContent=hours+'h';
+  const army=parseInt(document.getElementById('inp-army').value)||0;
+  let info=`${MODES[S.mode].emoji} ${MODES[S.mode].label}<br>${totalCases} case${totalCases>1?'s':''}`;
+  if(cps.length>2)info+=` · ${cps.length} étapes`;
+  if(S.mode==='armee')info+=`<br>${army.toLocaleString()} hommes`;
+  document.getElementById('r-info').innerHTML=info;
+  document.getElementById('result').className='';
+}
+
+function onModeChange(){
+  S.mode=document.getElementById('sel-mode').value;
+  document.getElementById('army-fld').className=S.mode==='armee'?'fld v':'fld';
+  calculate();
+}
+function clearAll(){S.checkpoints=[];updateCpBar();calculate();render();document.getElementById('result').className='h';}
+
+let _tt;
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('s');clearTimeout(_tt);_tt=setTimeout(()=>el.classList.remove('s'),1800);}
+
+window.addEventListener('resize',()=>fitMap());
+updateCpBar();
+</script>
+</body>
+</html>
