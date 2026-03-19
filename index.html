@@ -75,6 +75,8 @@ input:hover,input:focus{border-color:var(--bord-hi)}
     <label>Mode de déplacement</label>
     <div class="sw">
       <select id="sel-mode" onchange="onModeChange()">
+        <option value="corbeau">🐦‍⬛ Corbeau — 18/j</option>
+        <option value="emissaire">🏃 Émissaire — 0.7/j</option>
         <option value="pied">🚶 À pied — 0.5/j</option>
         <option value="cheval" selected>🐴 À cheval — 1/j</option>
         <option value="convoi">🛒 Convoi — 0.7/j</option>
@@ -130,6 +132,8 @@ const MAP_W=2000,MAP_H=1303,HEX_R=22;
 const HEX_W=Math.sqrt(3)*HEX_R,HEX_H=2*HEX_R;
 
 const MODES={
+  corbeau:  {label:"Corbeau",    speed:18, emoji:"🐦‍⬛"},
+  emissaire:{label:"Émissaire",  speed:0.7, emoji:"🏃"},
   pied:   {label:"À pied",         speed:0.5, emoji:"🚶"},
   cheval: {label:"À cheval",        speed:1,   emoji:"🐴"},
   convoi: {label:"Convoi",          speed:0.7, emoji:"🛒"},
