@@ -10,8 +10,7 @@
 :root{
   --gold:#d4a843;--gold-br:#f0c862;--gold-dim:#9a7420;
   --parch:#c9a96e;--parch-dk:#7a5c28;
-  --ink:#120b00;--bg:#060401;--panel:rgba(6,4,1,0.98);--bord:rgba(212,168,67,0.22);
-  --bord-hi:rgba(212,168,67,0.55);
+  --bg:#060401;--panel:rgba(6,4,1,0.98);--bord:rgba(212,168,67,0.22);--bord-hi:rgba(212,168,67,0.55);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--parch);font-family:'Crimson Text',serif}
@@ -20,8 +19,7 @@ body{display:flex;flex-direction:column}
   display:flex;align-items:center;gap:12px;flex-wrap:wrap;
   padding:8px 18px;
   background:linear-gradient(180deg,rgba(20,12,2,0.99) 0%,rgba(6,4,1,0.98) 100%);
-  border-bottom:1px solid var(--bord);
-  flex-shrink:0;min-height:54px;z-index:10;
+  border-bottom:1px solid var(--bord);flex-shrink:0;min-height:54px;z-index:10;
   box-shadow:0 2px 20px rgba(0,0,0,0.6);
 }
 #hdr h1{font-family:'Cinzel Decorative',serif;font-size:13px;color:var(--gold);letter-spacing:4px;white-space:nowrap;text-shadow:0 0 20px rgba(212,168,67,0.3)}
@@ -33,10 +31,6 @@ body{display:flex;flex-direction:column}
 select{background:rgba(0,0,0,0.55);border:1px solid var(--bord);color:var(--parch);font-family:'Crimson Text',serif;font-size:12.5px;padding:5px 24px 5px 9px;outline:none;border-radius:3px;appearance:none;cursor:pointer;transition:border-color .15s}
 select:hover,select:focus{border-color:var(--bord-hi)}
 select option{background:#130a00}
-input[type=number]{background:rgba(0,0,0,0.55);border:1px solid var(--bord);color:var(--parch);font-family:'Crimson Text',serif;font-size:12.5px;padding:5px 9px;outline:none;border-radius:3px;transition:border-color .15s}
-input:hover,input:focus{border-color:var(--bord-hi)}
-#army-fld{display:none}
-#army-fld.v{display:flex}
 .btn{padding:5px 12px;border:1px solid var(--bord);background:transparent;color:var(--parch-dk);font-family:'Cinzel',serif;font-size:8.5px;letter-spacing:.8px;cursor:pointer;transition:all .15s;border-radius:3px;white-space:nowrap}
 .btn:hover{border-color:var(--bord-hi);color:var(--parch)}
 #result{display:flex;align-items:center;gap:14px;background:rgba(212,168,67,0.05);border:1px solid var(--bord);border-left:2px solid var(--gold-dim);padding:5px 16px;border-radius:3px;margin-left:auto}
@@ -75,22 +69,18 @@ input:hover,input:focus{border-color:var(--bord-hi)}
     <label>Mode de déplacement</label>
     <div class="sw">
       <select id="sel-mode" onchange="onModeChange()">
-        <option value="corbeau">🐦‍⬛ Corbeau </option>
-        <option value="emissaire">🏃 Émissaire </option>
-        <option value="pied">🚶 À pied </option>
-        <option value="cheval" selected>🐴 À cheval </option>
-        <option value="convoi">🛒 Convoi </option>
+        <option value="corbeau">🐦‍⬛ Corbeau</option>
+        <option value="dragon">🐉 Dragon</option>
+        <option value="snekkar">⛵ Snekkar</option>
+        <option value="galere">🚢 Galère</option>
+        <option value="peche">🎣 Navire de pêche</option>
+        <option value="cheval" selected>🐴 À cheval</option>
+        <option value="emissaire">🏃 Émissaire</option>
+        <option value="convoi">🛒 Convoi</option>
+        <option value="pied">🚶 À pied</option>
         <option value="armee">⚔️ Armée</option>
-        <option value="dragon">🐉 Dragon </option>
-        <option value="snekkar">⛵ Snekkar </option>
-        <option value="galere">🚢 Galère </option>
-        <option value="peche">🎣 Navire pêche </option>
       </select>
     </div>
-  </div>
-  <div class="fld" id="army-fld">
-    <label>Effectif</label>
-    <input type="number" id="inp-army" value="10000" min="1" step="1000" style="width:100px" oninput="calculate()">
   </div>
   <div class="vsep"></div>
   <button class="btn" onclick="clearAll()">✕ Réinitialiser</button>
@@ -131,17 +121,20 @@ input:hover,input:focus{border-color:var(--bord-hi)}
 const MAP_W=2000,MAP_H=1303,HEX_R=22;
 const HEX_W=Math.sqrt(3)*HEX_R,HEX_H=2*HEX_R;
 
+// À cheval = référence = 60 jours pour ~108 cases (map Westeros Nord→Sud)
+// => speed = 108/60 = 1.8 cases/jour
+// On calibre tout par rapport à ça
 const MODES={
-  corbeau:  {label:"Corbeau",    speed:18, emoji:"🐦‍⬛"},
-  emissaire:{label:"Émissaire",  speed:0.5, emoji:"🏃"},
-  pied:   {label:"À pied",         speed:-0.5, emoji:"🚶"},
-  cheval: {label:"À cheval",        speed:1,   emoji:"🐴"},
-  convoi: {label:"Convoi",          speed:0.2, emoji:"🛒"},
-  armee:  {label:"Armée",           speed:-1,  emoji:"⚔️"},
-  dragon: {label:"Dragon",          speed:5,   emoji:"🐉"},
-  snekkar:{label:"Snekkar",         speed:2,   emoji:"⛵"},
-  galere: {label:"Galère",          speed:1.5, emoji:"🚢"},
-  peche:  {label:"Navire de pêche", speed:1.5, emoji:"🎣"},
+  corbeau:  {label:"Corbeau",          speed:500,  emoji:"🐦‍⬛"},
+  dragon:   {label:"Dragon",           speed:12,   emoji:"🐉"},
+  snekkar:  {label:"Snekkar",          speed:4,    emoji:"⛵"},
+  galere:   {label:"Galère",           speed:3,    emoji:"🚢"},
+  peche:    {label:"Navire de pêche",  speed:2.5,  emoji:"🎣"},
+  cheval:   {label:"À cheval",         speed:1.8,  emoji:"🐴"},
+  emissaire:{label:"Émissaire",        speed:1.2,  emoji:"🏃"},
+  convoi:   {label:"Convoi",           speed:0.9,  emoji:"🛒"},
+  pied:     {label:"À pied",           speed:0.6,  emoji:"🚶"},
+  armee:    {label:"Armée",            speed:0.3,  emoji:"⚔️"},
 };
 
 const CP_COLORS=['#50dc50','#f0c862','#60aaff','#ff8c60','#cc77ff','#ff6090','#50e8d0','#ffcc30'];
@@ -328,30 +321,25 @@ function updateCpBar(){
   });
 }
 
-function armySpd(n){return n>=60000?0.3:n>=30000?0.5:0.7;}
-
 function calculate(){
   const cps=S.checkpoints;
   if(cps.length<2){document.getElementById('result').className='h';return;}
   let totalCases=0;
   for(let i=0;i<cps.length-1;i++)totalCases+=hexDist(cps[i].col,cps[i].row,cps[i+1].col,cps[i+1].row);
-  const spd=S.mode==='armee'?armySpd(parseInt(document.getElementById('inp-army').value)||10000):MODES[S.mode].speed;
+  const spd=MODES[S.mode].speed;
   const totalHours=totalCases/spd*24;
   const days=Math.floor(totalHours/24);
   const hours=Math.round(totalHours%24);
   document.getElementById('r-days').textContent=days;
   document.getElementById('r-hours').textContent=hours+'h';
-  const army=parseInt(document.getElementById('inp-army').value)||0;
   let info=`${MODES[S.mode].emoji} ${MODES[S.mode].label}<br>${totalCases} case${totalCases>1?'s':''}`;
   if(cps.length>2)info+=` · ${cps.length} étapes`;
-  if(S.mode==='armee')info+=`<br>${army.toLocaleString()} hommes`;
   document.getElementById('r-info').innerHTML=info;
   document.getElementById('result').className='';
 }
 
 function onModeChange(){
   S.mode=document.getElementById('sel-mode').value;
-  document.getElementById('army-fld').className=S.mode==='armee'?'fld v':'fld';
   calculate();
 }
 function clearAll(){S.checkpoints=[];updateCpBar();calculate();render();document.getElementById('result').className='h';}
